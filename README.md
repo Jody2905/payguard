@@ -4,6 +4,8 @@
 
 PayGuard reads a year of payments, the vendor list and the staff list, runs thirteen checks that internal auditors use, adds a machine-learning outlier model, and gives every payment a risk score from 0 to 100. Reviewers get a ranked list of cases, the reason for each one, and an Excel workbook and HTML report they can hand on.
 
+**[Live dashboard](https://payguard-jody2905.streamlit.app/)** · **[Sample report](https://jody2905.github.io/payguard/)**
+
 It comes with a generator for realistic sample treasury data with fraud planted in it, so the detection rate can be measured instead of guessed.
 
 ![Dashboard overview](docs/overview.png)
@@ -77,7 +79,15 @@ Top 5:
   ...
 ```
 
-Options: `--skip RULE ...` turns checks off, `--outliers 0.02` flags more statistical outliers (0 turns the model off).
+Options: `--skip RULE ...` turns checks off, `--outliers 0.02` flags more statistical outliers (0 turns the model off), `--dashboard-url URL` adds a button linking the HTML report to a hosted dashboard.
+
+The sample report on GitHub Pages (`docs/index.html`) is made with:
+
+```bash
+payguard generate --out sample_data
+payguard scan sample_data --out reports --title "Sample treasury payments 2025" --dashboard-url https://payguard-jody2905.streamlit.app/
+cp reports/payguard_report.html docs/index.html
+```
 
 ## The dashboard
 

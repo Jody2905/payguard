@@ -97,7 +97,8 @@ def to_excel(result: Result, path: str | Path) -> Path:
 
 CSS = """
 body{font-family:Segoe UI,system-ui,sans-serif;margin:0;background:#f4f6f9;color:#1d2733}
-header{background:#1f3a5f;color:#fff;padding:28px 40px}header h1{margin:0;font-size:26px}header p{margin:6px 0 0;opacity:.8}
+header{background:#1f3a5f;color:#fff;padding:28px 40px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.cta{background:#fff;color:#1f3a5f;font-weight:700;text-decoration:none;padding:11px 20px;border-radius:8px;white-space:nowrap}.cta:hover{background:#e8eef6}header h1{margin:0;font-size:26px}header p{margin:6px 0 0;opacity:.8}
 main{max-width:1200px;margin:0 auto;padding:28px 40px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px}
 .tile{background:#fff;border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -116,7 +117,7 @@ def _e(x) -> str:
     return html.escape(str(x))
 
 
-def to_html(result: Result, path: str | Path, title: str = "Payment review", top: int = 100) -> Path:
+def to_html(result: Result, path: str | Path, title: str = "Payment review", top: int = 100, dashboard_url: str | None = None) -> Path:
     path = Path(path)
     s = summary(result)
     tiles = "".join(f'<div class="tile"><span>{_e(k)}</span><b>{_e(v)}</b></div>' for k, v in s.items() if k not in ("Critical", "High", "Medium"))
@@ -134,9 +135,11 @@ def to_html(result: Result, path: str | Path, title: str = "Payment review", top
     vend = result.by_vendor().head(15)
     vend_rows = "".join(f'<tr><td>{_e(r.vendor)}</td><td class="num">{r.cases}</td><td class="num">EC${r.amount:,.2f}</td>'
                         f'<td class="num">{r.top_risk:.0f}</td></tr>' for r in vend.itertuples())
+    cta = (f'<a class="cta" href="{_e(dashboard_url)}" target="_blank" rel="noopener">Open the live dashboard →</a>'
+           if dashboard_url else "")
     doc = f"""<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{_e(title)}</title><style>{CSS}</style></head><body>
-<header><h1>{_e(title)}</h1><p>PayGuard report · {_e(s['Period'])} · generated {datetime.now():%d %b %Y %H:%M}</p></header>
+<header><div><h1>{_e(title)}</h1><p>PayGuard report · {_e(s['Period'])} · generated {datetime.now():%d %b %Y %H:%M}</p></div>{cta}</header>
 <main><div class="tiles">{tiles}{lv}</div>
 <h2>What was found</h2><table><tr><th>Check</th><th class="num">Payments</th><th></th><th class="num">Amount</th></tr>{rule_rows}</table>
 <h2>Payments to review (top {min(top, len(result.cases))} of {len(result.cases):,})</h2>

@@ -37,7 +37,7 @@ def cmd_scan(args) -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     xlsx = to_excel(result, out / "payguard_cases.xlsx")
-    page = to_html(result, out / "payguard_report.html", title=args.title)
+    page = to_html(result, out / "payguard_report.html", title=args.title, dashboard_url=args.dashboard_url)
     result.scored.to_csv(out / "scored_payments.csv", index=False)
     c = result.cases
     print(f"Checked {len(ds.payments):,} payments (EC${ds.payments.amount.sum():,.2f}).")
@@ -88,6 +88,7 @@ def main(argv: list[str] | None = None) -> None:
         p.set_defaults(fn=fn)
     sub.choices["scan"].add_argument("--out", default="payguard_output")
     sub.choices["scan"].add_argument("--title", default="Payment review")
+    sub.choices["scan"].add_argument("--dashboard-url", help="add an 'Open the live dashboard' button to the HTML report")
     sub.choices["evaluate"].add_argument("--threshold", type=float, default=35)
 
     args = ap.parse_args(argv)
